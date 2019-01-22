@@ -7,16 +7,18 @@ Created on Wed Jan 16 20:13:08 2019
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
-# Data preprocessing
+### Data preprocessing
 dataset_train = pd.read_csv("Google_Stock_Price_Train.csv")
 training_data = dataset_train.iloc[:,1:2].values
 
 
 '''
+# Plot of training data
+
 plt.plot(training_data, color = 'blue', label = 'Real stock price 2017')
 
 plt.xlabel('Time')
@@ -53,7 +55,7 @@ X_train, y_train = np.array(X_train), np.array(y_train)
 X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1],1))
 
 
-# Building the RNN
+### Building the RNN
 
 from keras.models import Sequential
 from keras.layers import Dense, LSTM, Dropout
@@ -67,7 +69,7 @@ regressor.add(LSTM(units= 50,return_sequences=True, input_shape = (X_train.shape
 # Dropuout regularisation
 regressor.add(Dropout(0.2))
 
-## NOTE model.summary() to check if same layer has been added
+## NOTE model.summary() can be used to check if same layer has been added
 
 # adding 2nd LSTM layer and dropout regularisation
 regressor.add(LSTM(units= 50,return_sequences=True, input_shape = (X_train.shape[1],1)))
@@ -88,15 +90,19 @@ regressor.add(Dropout(0.2))
 # which here will be just 1 (Stock price at time t+1)
 regressor.add(Dense(units = 1))
 
-# Compiling RNN
+### Compiling RNN
 regressor.compile(optimizer= 'adam', loss= 'mean_squared_error')
 
 
 
-## Training RNN
+### Training RNN
 
 regressor.fit(X_train, y_train, epochs= 100, batch_size= 32)
 
+
+
+
+### Forecasting 
 
 # Predicting future stock price
 dataset_test = pd.read_csv("Google_Stock_Price_Test.csv")
@@ -127,6 +133,7 @@ predicted_stock_price = sc.inverse_transform(predicted_stock_price)
 
 
 '''
+# Plot for testing data
 plt.plot(real_stock_price, color = 'blue', label = 'Real stock price 2017')
 
 plt.xlabel('Time')
@@ -143,7 +150,7 @@ plt.show()
 
 
 # Results
-
+import matplotlib.pyplot as plt
 import seaborn as sns
 
 sns.set_style("whitegrid")
@@ -167,8 +174,17 @@ plt.show()
 
 regressor.summary()
 
+import math
+from sklearn.metrics import mean_squared_error,mean_absolute_error,r2_score
+rmse = math.sqrt(mean_squared_error(real_stock_price, predicted_stock_price))
+mae = mean_absolute_error(real_stock_price, predicted_stock_price)
+coeff_determination = r2_score(real_stock_price, predicted_stock_price)
 
+print("\n RMSE for model : ", rmse)
 
+print("\n Mean Absolute Error for model : ", mae)
+
+print("\n Coefficeint of determination (r^2) for model : ", coeff_determination)
 
 
 
